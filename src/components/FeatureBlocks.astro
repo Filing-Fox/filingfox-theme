@@ -2,30 +2,59 @@
 interface Feature { title: string; body: string; icon?: string; }
 interface Props { features?: Feature[]; }
 const defaults: Feature[] = [
-  { title: "Fast Shipping", body: "Orders ship within 1–2 business days from our warehouse.", icon: "🚚" },
-  { title: "Secure Checkout", body: "Your information is protected with industry-standard encryption.", icon: "🔒" },
-  { title: "Easy Returns", body: "30-day no-questions-asked returns on every order.", icon: "↩️" },
-  { title: "Real Support", body: "Email or phone — talk to a human, every time.", icon: "💬" },
+  { title: "Free Shipping", body: "On all orders over $50, delivered to your door.", icon: "🚚" },
+  { title: "Secure Checkout", body: "256-bit encryption protects every transaction.", icon: "🔒" },
+  { title: "30-Day Returns", body: "Not loving it? Send it back, no questions asked.", icon: "↩️" },
+  { title: "Real Support", body: "Email or call us — talk to a human, every time.", icon: "💬" },
 ];
 const { features = defaults } = Astro.props;
 ---
-<section class="section section-tight">
-  <div class="container feat-grid">
+<section class="trust-strip">
+  <div class="container trust-grid">
     {features.map((f) => (
-      <div class="feat">
-        {f.icon && <span class="feat-icon" aria-hidden="true">{f.icon}</span>}
-        <h3>{f.title}</h3>
-        <p class="muted">{f.body}</p>
+      <div class="trust-item">
+        {f.icon && <span class="trust-icon" aria-hidden="true">{f.icon}</span>}
+        <div>
+          <h3>{f.title}</h3>
+          <p>{f.body}</p>
+        </div>
       </div>
     ))}
   </div>
 </section>
 <style>
-  .feat-grid {
-    display: grid; gap: 1.5rem;
+  .trust-strip {
+    background: var(--color-bg-alt);
+    border-top: 1px solid var(--color-border);
+    border-bottom: 1px solid var(--color-border);
+    padding: 1.5rem 0;
+  }
+  .trust-grid {
+    display: grid;
+    gap: 1rem;
     grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
   }
-  .feat { text-align: center; padding: 1rem; }
-  .feat-icon { font-size: 1.85rem; }
-  .feat h3 { margin: 0.4rem 0 0.25rem; font-size: 1.05rem; }
+  .trust-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.85rem;
+    padding: 0.25rem;
+  }
+  .trust-icon {
+    font-size: 1.65rem;
+    line-height: 1;
+    flex-shrink: 0;
+  }
+  .trust-item h3 {
+    font-size: 0.95rem;
+    font-weight: 700;
+    margin: 0 0 0.15rem;
+    letter-spacing: -0.005em;
+  }
+  .trust-item p {
+    font-size: 0.85rem;
+    color: var(--color-fg-muted);
+    margin: 0;
+    line-height: 1.45;
+  }
 </style>

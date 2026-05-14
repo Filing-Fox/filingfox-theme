@@ -6,43 +6,62 @@ const year = new Date().getFullYear();
 ---
 <footer class="site-footer">
   <div class="container footer-grid">
-    <div>
-      <h3>{site.siteName}</h3>
-      <p class="muted">{site.tagline}</p>
-      <p class="muted small">
+    <div class="brand-col">
+      <a href="/" class="footer-brand">
+        <img src={site.brand.logo} alt={site.siteName} class="footer-logo" />
+      </a>
+      <p class="muted small">{site.tagline}</p>
+      <address class="muted small">
         {site.address.line1}{site.address.line2 ? `, ${site.address.line2}` : ""}<br />
         {site.address.city}, {site.address.region} {site.address.postalCode}<br />
         {site.address.country}
-      </p>
+      </address>
     </div>
     <div>
       <h4>Shop</h4>
       <ul>
         <li><a href="/products">All Products</a></li>
-        <li><a href="/about">About Us</a></li>
-        <li><a href="/contact">Contact</a></li>
+        <li><a href="/products#cat-mens-shirts">Men</a></li>
+        <li><a href="/products#cat-womens-dresses">Women</a></li>
+        <li><a href="/products">New Arrivals</a></li>
       </ul>
     </div>
     <div>
-      <h4>Support</h4>
+      <h4>Customer Care</h4>
       <ul>
         <li><a href="/shipping">Shipping</a></li>
-        <li><a href="/returns">Returns</a></li>
-        <li><a href="/privacy">Privacy Policy</a></li>
-        <li><a href="/terms">Terms of Service</a></li>
+        <li><a href="/returns">Returns & Refunds</a></li>
+        <li><a href="/contact">Contact Us</a></li>
+        <li><a href={`mailto:${site.email}`}>Order Help</a></li>
       </ul>
     </div>
     <div>
-      <h4>Contact</h4>
+      <h4>Company</h4>
       <ul>
-        <li><a href={`mailto:${site.email}`}>{site.email}</a></li>
+        <li><a href="/about">About {site.siteName}</a></li>
+        <li><a href="/privacy">Privacy Policy</a></li>
+        <li><a href="/terms">Terms of Service</a></li>
         <li><a href={`tel:${site.phone.replace(/[^+\d]/g, "")}`}>{site.phone}</a></li>
-        {site.hours && <li class="muted small">{site.hours}</li>}
       </ul>
+    </div>
+  </div>
+  <div class="payment-row">
+    <div class="container payment-flex">
+      <span class="muted small">We accept:</span>
+      <div class="payment-icons" aria-label="Accepted payment methods">
+        <span class="pay-pill">VISA</span>
+        <span class="pay-pill">MasterCard</span>
+        <span class="pay-pill">AMEX</span>
+        <span class="pay-pill">Discover</span>
+        <span class="pay-pill">PayPal</span>
+        <span class="pay-pill">Apple Pay</span>
+        <span class="pay-pill">Google Pay</span>
+      </div>
     </div>
   </div>
   <div class="container footer-bottom">
     <span class="muted small">© {year} {site.legal?.companyName ?? site.siteName}. All rights reserved.</span>
+    <span class="muted small">Secure SSL · 256-bit encryption</span>
   </div>
 </footer>
 <style>
@@ -50,23 +69,71 @@ const year = new Date().getFullYear();
     background: var(--color-bg-alt);
     border-top: 1px solid var(--color-border);
     margin-top: 4rem;
-    padding: 3rem 0 1.5rem;
+    padding: 3.5rem 0 0;
   }
   .footer-grid {
     display: grid;
-    gap: 2rem;
-    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 2.5rem;
+    grid-template-columns: 1.4fr 1fr 1fr 1fr;
+    padding-bottom: 2.5rem;
   }
-  .site-footer h3 { margin: 0 0 0.25rem; }
-  .site-footer h4 { margin: 0 0 0.75rem; font-size: 0.95rem; text-transform: uppercase; letter-spacing: 0.05em; }
+  @media (max-width: 760px) {
+    .footer-grid { grid-template-columns: 1fr 1fr; }
+    .brand-col { grid-column: 1 / -1; }
+  }
+  .footer-brand { display: inline-block; margin-bottom: 0.75rem; }
+  .footer-logo {
+    background: var(--color-primary);
+    padding: 0.5rem 0.75rem;
+    border-radius: var(--radius);
+    height: 44px;
+    width: auto;
+    max-width: 200px;
+    object-fit: contain;
+  }
+  .site-footer h4 {
+    margin: 0 0 1rem;
+    font-size: 0.85rem;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--color-fg);
+    font-weight: 700;
+  }
   .site-footer ul { list-style: none; padding: 0; margin: 0; }
-  .site-footer ul li { margin-bottom: 0.4rem; }
-  .site-footer a { color: var(--color-fg-muted); text-decoration: none; }
+  .site-footer ul li { margin-bottom: 0.55rem; }
+  .site-footer a { color: var(--color-fg-muted); text-decoration: none; transition: color 0.15s; }
   .site-footer a:hover { color: var(--color-fg); }
-  .small { font-size: 0.85rem; }
+  address { font-style: normal; }
+  .small { font-size: 0.85rem; line-height: 1.55; }
+  .payment-row {
+    background: white;
+    border-top: 1px solid var(--color-border);
+    padding: 1.25rem 0;
+  }
+  .payment-flex {
+    display: flex;
+    align-items: center;
+    gap: 0.85rem;
+    flex-wrap: wrap;
+    justify-content: space-between;
+  }
+  .payment-icons { display: flex; gap: 0.4rem; flex-wrap: wrap; }
+  .pay-pill {
+    background: var(--color-bg-alt);
+    border: 1px solid var(--color-border);
+    padding: 0.3rem 0.7rem;
+    border-radius: 4px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: var(--color-fg);
+  }
   .footer-bottom {
     border-top: 1px solid var(--color-border);
-    margin-top: 2rem;
-    padding-top: 1.25rem;
+    padding: 1rem 0 1.25rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 0.5rem;
+    flex-wrap: wrap;
   }
 </style>

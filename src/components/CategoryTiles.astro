@@ -1,0 +1,96 @@
+---
+import type { Product } from "../lib/select-products";
+
+interface Props {
+  products: Product[];
+}
+const { products } = Astro.props;
+
+const counts = new Map<string, { count: number; image?: string }>();
+for (const p of products) {
+  const cur = counts.get(p.category);
+  if (cur) {
+    cur.count += 1;
+    if (!cur.image && p.images?.[0]) cur.image = p.images[0];
+  } else {
+    counts.set(p.category, { count: 1, image: p.images?.[0] });
+  }
+}
+const tiles = Array.from(counts, ([name, v]) => ({ name, ...v }))
+  .sort((a, b) => b.count - a.count)
+  .slice(0, 8);
+const anchor = (n: string) => `cat-${n.toLowerCase().replace(/[^a-z0-9]+/g, "-")}`;
+---
+<section class="section section-tight">
+  <div class="container">
+    <header class="section-head">
+      <h2>Shop by category</h2>
+      <a href="/products" class="see-all">See all →</a>
+    </header>
+    <div class="tiles">
+      {tiles.map((t) => (
+        <a href={`/products#${anchor(t.name)}`} class="tile">
+          {t.image && <img src={t.image} alt="" loading="lazy" />}
+          <div class="tile-body">
+            <span class="tile-name">{t.name}</span>
+            <span class="tile-count">{t.count} {t.count === 1 ? "item" : "items"}</span>
+          </div>
+        </a>
+      ))}
+    </div>
+  </div>
+</section>
+<style>
+  .section-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    margin-bottom: 1.5rem;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
+  .section-head h2 { margin: 0; }
+  .see-all {
+    color: var(--color-fg-muted);
+    text-decoration: none;
+    font-weight: 600;
+    font-size: 0.92rem;
+  }
+  .see-all:hover { color: var(--color-fg); }
+  .tiles {
+    display: grid;
+    gap: 1rem;
+    grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+  }
+  .tile {
+    background: white;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+    text-decoration: none;
+    color: var(--color-fg);
+    transition: transform 0.2s, box-shadow 0.2s, border-color 0.2s;
+    display: flex;
+    flex-direction: column;
+  }
+  .tile:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 18px rgba(0,0,0,0.08);
+    border-color: var(--color-fg-muted);
+  }
+  .tile img {
+    width: 100%;
+    aspect-ratio: 1.1;
+    object-fit: contain;
+    padding: 10%;
+    background: linear-gradient(135deg, #f3f4f6 0%, #fafafa 100%);
+  }
+  .tile-body {
+    padding: 0.7rem 0.9rem 0.95rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.15rem;
+  }
+  .tile-name { font-weight: 600; font-size: 0.95rem; }
+  .tile-count { color: var(--color-fg-muted); font-size: 0.8rem; }
+</style>

@@ -13,6 +13,10 @@ export interface Product {
   longDescMd: string;
   specs: Record<string, string>;
   tags: string[];
+  rating?: number;
+  reviewCount?: number;
+  stock?: number;
+  brand?: string;
 }
 
 function fnv1a(str: string): number {

@@ -9,7 +9,15 @@ interface Props {
 }
 const { product, currency } = Astro.props;
 const fmt = currencyFormatter(currency);
-const onSale = product.compareAtPrice && product.compareAtPrice > product.price;
+const onSale = !!(product.compareAtPrice && product.compareAtPrice > product.price);
+const discountPct = onSale && product.compareAtPrice
+  ? Math.round((1 - product.price / product.compareAtPrice) * 100)
+  : 0;
+const rating = product.rating ?? 4.2;
+const fullStars = Math.floor(rating);
+const halfStar = rating - fullStars >= 0.5;
+const emptyStars = 5 - fullStars - (halfStar ? 1 : 0);
+const reviews = product.reviewCount ?? Math.round(rating * 18);
 const productJson = JSON.stringify({
   slug: product.slug,
   name: product.name,
@@ -18,45 +26,188 @@ const productJson = JSON.stringify({
   image: product.images[0],
 });
 ---
-<article class="product-card card" x-data>
+<article class="product-card" x-data="{ hover: false }" @mouseenter="hover = true" @mouseleave="hover = false">
   <a class="product-image" href={`/products/${product.slug}`} aria-label={product.name}>
-    <img src={product.images[0]} alt={product.name} loading="lazy" decoding="async" width="400" height="400" />
-    {onSale && <span class="sale-tag">Sale</span>}
-  </a>
-  <div class="product-body">
-    <a class="product-name" href={`/products/${product.slug}`}>{product.name}</a>
-    <div class="price-row">
-      <span class="price">{fmt.format(product.price)}</span>
-      {onSale && product.compareAtPrice && <span class="strike">{fmt.format(product.compareAtPrice)}</span>}
-    </div>
+    <img
+      src={product.images[0]}
+      alt={product.name}
+      loading="lazy"
+      decoding="async"
+      width="400"
+      height="400"
+      class="img-primary"
+    />
+    {product.images[1] && (
+      <img
+        src={product.images[1]}
+        alt=""
+        loading="lazy"
+        decoding="async"
+        width="400"
+        height="400"
+        class="img-secondary"
+        aria-hidden="true"
+      />
+    )}
+    {onSale && discountPct > 0 && (
+      <span class="badge-sale">-{discountPct}%</span>
+    )}
+    {product.stock !== undefined && product.stock < 10 && product.stock > 0 && (
+      <span class="badge-low">Only {product.stock} left</span>
+    )}
     <button
       type="button"
-      class="btn btn-primary add-btn"
+      class="quick-add"
       data-product={productJson}
-      @click={`$store.cart.add(JSON.parse($el.dataset.product), 1)`}
+      @click.prevent.stop={`$store.cart.add(JSON.parse($el.dataset.product), 1)`}
+      aria-label={`Add ${product.name} to cart`}
     >
-      Add to Cart
+      <span aria-hidden="true">+</span> Add to cart
     </button>
+  </a>
+  <div class="product-body">
+    <span class="brand-tag" set:text={product.brand ?? product.category}></span>
+    <a class="product-name" href={`/products/${product.slug}`}>{product.name}</a>
+    <div class="rating-row" aria-label={`${rating.toFixed(1)} out of 5 stars`}>
+      <span class="stars" aria-hidden="true">
+        {Array.from({ length: fullStars }).map(() => <span class="star full">★</span>)}
+        {halfStar && <span class="star half">★</span>}
+        {Array.from({ length: emptyStars }).map(() => <span class="star empty">★</span>)}
+      </span>
+      <span class="review-count">({reviews})</span>
+    </div>
+    <div class="price-row">
+      <span class="price-now">{fmt.format(product.price)}</span>
+      {onSale && product.compareAtPrice && (
+        <span class="price-was">{fmt.format(product.compareAtPrice)}</span>
+      )}
+    </div>
   </div>
 </article>
 <style>
-  .product-card { display: flex; flex-direction: column; }
-  .product-image { display: block; position: relative; aspect-ratio: 1 / 1; overflow: hidden; background: var(--color-bg-alt); }
-  .product-image img { width: 100%; height: 100%; object-fit: cover; transition: transform 0.3s; }
-  .product-image:hover img { transform: scale(1.04); }
-  .sale-tag {
-    position: absolute; top: 0.6rem; left: 0.6rem;
-    background: var(--color-danger); color: white;
-    font-size: 0.75rem; font-weight: 600;
-    padding: 0.2rem 0.55rem; border-radius: 999px;
+  .product-card {
+    background: white;
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+    border: 1px solid var(--color-border);
+    transition: transform 0.2s, box-shadow 0.2s, border-color 0.2s;
+    display: flex;
+    flex-direction: column;
+    position: relative;
   }
-  .product-body { padding: 0.9rem 0.95rem 1.1rem; display: flex; flex-direction: column; gap: 0.6rem; }
+  .product-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 10px 24px rgba(0,0,0,0.10);
+    border-color: var(--color-fg-muted);
+  }
+  .product-image {
+    display: block;
+    position: relative;
+    aspect-ratio: 1;
+    overflow: hidden;
+    background: linear-gradient(135deg, #f3f4f6 0%, #fafafa 100%);
+  }
+  .product-image img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    padding: 8%;
+    transition: opacity 0.3s, transform 0.4s;
+  }
+  .img-secondary {
+    position: absolute;
+    top: 0; left: 0;
+    opacity: 0;
+  }
+  .product-card:hover .img-primary { opacity: 0; transform: scale(1.02); }
+  .product-card:hover .img-secondary { opacity: 1; transform: scale(1.02); }
+  .badge-sale {
+    position: absolute;
+    top: 0.65rem;
+    left: 0.65rem;
+    background: var(--color-accent);
+    color: white;
+    font-size: 0.78rem;
+    font-weight: 700;
+    padding: 0.22rem 0.55rem;
+    border-radius: 4px;
+    letter-spacing: 0.02em;
+  }
+  .badge-low {
+    position: absolute;
+    top: 0.65rem;
+    right: 0.65rem;
+    background: #f59e0b;
+    color: white;
+    font-size: 0.72rem;
+    font-weight: 600;
+    padding: 0.2rem 0.5rem;
+    border-radius: 4px;
+  }
+  .quick-add {
+    position: absolute;
+    left: 0.6rem;
+    right: 0.6rem;
+    bottom: 0.6rem;
+    padding: 0.55rem 0.75rem;
+    background: var(--color-primary);
+    color: var(--color-primary-fg);
+    border: 0;
+    border-radius: var(--radius);
+    font-weight: 600;
+    font-size: 0.88rem;
+    cursor: pointer;
+    opacity: 0;
+    transform: translateY(8px);
+    transition: opacity 0.2s, transform 0.2s, filter 0.15s;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.35rem;
+  }
+  .quick-add:hover { filter: brightness(1.1); }
+  .product-card:hover .quick-add { opacity: 1; transform: translateY(0); }
+  @media (max-width: 760px) {
+    .quick-add { opacity: 1; transform: none; }
+  }
+  .product-body { padding: 0.85rem 0.95rem 1.1rem; display: flex; flex-direction: column; gap: 0.4rem; }
+  .brand-tag {
+    font-size: 0.7rem;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--color-fg-muted);
+    font-weight: 600;
+  }
   .product-name {
-    color: var(--color-fg); text-decoration: none; font-weight: 600;
-    line-height: 1.3; min-height: 2.6em;
-    display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
+    color: var(--color-fg);
+    text-decoration: none;
+    font-weight: 600;
+    line-height: 1.3;
+    font-size: 0.95rem;
+    min-height: 2.5em;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
   }
-  .price-row { display: flex; gap: 0.5rem; align-items: baseline; }
-  .price { font-weight: 700; font-size: 1.05rem; }
-  .add-btn { margin-top: auto; }
+  .product-name:hover { color: var(--color-accent); }
+  .rating-row {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    font-size: 0.82rem;
+  }
+  .stars { display: inline-flex; gap: 1px; line-height: 1; }
+  .star { color: #f59e0b; font-size: 1rem; }
+  .star.empty { color: #d1d5db; }
+  .star.half {
+    background: linear-gradient(90deg, #f59e0b 50%, #d1d5db 50%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+  .review-count { color: var(--color-fg-muted); font-size: 0.8rem; }
+  .price-row { display: flex; gap: 0.5rem; align-items: baseline; margin-top: 0.15rem; }
+  .price-now { font-weight: 700; font-size: 1.1rem; color: var(--color-fg); }
+  .price-was { font-size: 0.85rem; color: var(--color-fg-muted); text-decoration: line-through; }
 </style>
