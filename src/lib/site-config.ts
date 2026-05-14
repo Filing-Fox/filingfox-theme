@@ -1,11 +1,5 @@
-export type Niche =
-  | "apparel"
-  | "home-goods"
-  | "electronics-accessories"
-  | "beauty-personal-care"
-  | "sports-outdoors";
-
-export type Currency = "USD" | "EUR" | "GBP" | "PKR" | "AED" | "CAD" | "AUD";
+export type Niche = string;
+export type Currency = string;
 
 export interface SiteSocial {
   facebook?: string;
