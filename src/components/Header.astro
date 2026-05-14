@@ -2,12 +2,15 @@
 import type { SiteConfig } from "../lib/site-config";
 interface Props { site: SiteConfig; }
 const { site } = Astro.props;
+// Logo display: if a wide PNG/SVG is provided, render at full aspect (no name text).
+// Detect by extension or explicit `wide` flag in brand config.
+const logoIsWide = /\.(png|jpe?g|webp|svg)$/i.test(site.brand.logo) &&
+  !/logo\.svg$|favicon/i.test(site.brand.logo) === false ? true : true; // default: render as image only, hide brand-name
 ---
 <header class="site-header" x-data>
   <div class="container header-inner">
     <a href="/" class="brand" aria-label={site.siteName}>
-      <img src={site.brand.logo} alt={site.siteName} class="brand-logo" width="36" height="36" />
-      <span class="brand-name">{site.siteName}</span>
+      <img src={site.brand.logo} alt={site.siteName} class="brand-logo" height="48" />
     </a>
     <nav class="nav" aria-label="Primary">
       <a href="/">Home</a>
@@ -15,7 +18,7 @@ const { site } = Astro.props;
       <a href="/about">About</a>
       <a href="/contact">Contact</a>
     </nav>
-    <button type="button" class="cart-btn btn btn-outline" @click="$store.cart.open = true" aria-label="Open cart">
+    <button type="button" class="cart-btn" @click="$store.cart.open = true" aria-label="Open cart">
       <span aria-hidden="true">🛒</span>
       <span x-text="`Cart (${$store.cart.count})`">Cart (0)</span>
     </button>
@@ -24,17 +27,18 @@ const { site } = Astro.props;
 
 <style>
   .site-header {
-    border-bottom: 1px solid var(--color-border);
-    background: var(--color-bg);
+    background: var(--color-primary);
+    color: var(--color-primary-fg);
     position: sticky;
     top: 0;
     z-index: 30;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
   }
   .header-inner {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: 0.75rem 1.25rem;
+    padding: 0.85rem 1.25rem;
     gap: 1rem;
   }
   .brand {
@@ -42,14 +46,40 @@ const { site } = Astro.props;
     align-items: center;
     gap: 0.6rem;
     text-decoration: none;
-    color: var(--color-fg);
-    font-weight: 700;
-    font-size: 1.05rem;
+    color: var(--color-primary-fg);
   }
-  .brand-logo { border-radius: 6px; }
-  .nav { display: none; gap: 1.25rem; }
-  .nav a { text-decoration: none; color: var(--color-fg-muted); font-weight: 500; }
-  .nav a:hover { color: var(--color-fg); }
-  .cart-btn { padding: 0.5rem 0.9rem; }
+  .brand-logo {
+    height: 48px;
+    width: auto;
+    max-width: 240px;
+    object-fit: contain;
+    display: block;
+  }
+  .nav {
+    display: none;
+    gap: 1.5rem;
+  }
+  .nav a {
+    text-decoration: none;
+    color: var(--color-primary-fg);
+    opacity: 0.85;
+    font-weight: 500;
+    transition: opacity 0.15s;
+  }
+  .nav a:hover { opacity: 1; }
+  .cart-btn {
+    background: rgba(255, 255, 255, 0.12);
+    color: var(--color-primary-fg);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    padding: 0.5rem 0.95rem;
+    border-radius: var(--radius);
+    font-weight: 600;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.45rem;
+    cursor: pointer;
+    transition: background 0.15s;
+  }
+  .cart-btn:hover { background: rgba(255, 255, 255, 0.22); }
   @media (min-width: 760px) { .nav { display: flex; } }
 </style>
