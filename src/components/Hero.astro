@@ -1,0 +1,62 @@
+---
+import type { SiteConfig } from "../lib/site-config";
+interface Props {
+  site: SiteConfig;
+  eyebrow?: string;
+  headline?: string;
+  sub?: string;
+  ctaHref?: string;
+  ctaLabel?: string;
+  image?: string;
+}
+const {
+  site,
+  eyebrow,
+  headline = site.siteName,
+  sub = site.description,
+  ctaHref = "/products",
+  ctaLabel = "Shop Now",
+  image,
+} = Astro.props;
+---
+<section class="hero">
+  <div class="container hero-grid">
+    <div class="hero-copy">
+      {eyebrow && <span class="eyebrow">{eyebrow}</span>}
+      <h1>{headline}</h1>
+      <p class="lead">{sub}</p>
+      <a href={ctaHref} class="btn btn-primary">{ctaLabel}</a>
+    </div>
+    {image && (
+      <div class="hero-image">
+        <img src={image} alt="" loading="eager" decoding="async" />
+      </div>
+    )}
+  </div>
+</section>
+<style>
+  .hero {
+    background: linear-gradient(180deg, var(--color-bg-alt), var(--color-bg));
+    padding: 4rem 0;
+  }
+  .hero-grid {
+    display: grid;
+    gap: 2.5rem;
+    grid-template-columns: 1fr;
+    align-items: center;
+  }
+  .eyebrow {
+    display: inline-block;
+    font-size: 0.85rem;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--color-accent);
+    margin-bottom: 0.75rem;
+    font-weight: 600;
+  }
+  .lead { font-size: 1.15rem; color: var(--color-fg-muted); max-width: 52ch; margin-bottom: 1.5rem; }
+  .hero-image img { border-radius: var(--radius-lg); box-shadow: var(--shadow); }
+  @media (min-width: 800px) {
+    .hero-grid { grid-template-columns: 1.05fr 1fr; }
+  }
+</style>

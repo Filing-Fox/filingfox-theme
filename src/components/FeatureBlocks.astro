@@ -1,0 +1,31 @@
+---
+interface Feature { title: string; body: string; icon?: string; }
+interface Props { features?: Feature[]; }
+const defaults: Feature[] = [
+  { title: "Fast Shipping", body: "Orders ship within 1–2 business days from our warehouse.", icon: "🚚" },
+  { title: "Secure Checkout", body: "Your information is protected with industry-standard encryption.", icon: "🔒" },
+  { title: "Easy Returns", body: "30-day no-questions-asked returns on every order.", icon: "↩️" },
+  { title: "Real Support", body: "Email or phone — talk to a human, every time.", icon: "💬" },
+];
+const { features = defaults } = Astro.props;
+---
+<section class="section section-tight">
+  <div class="container feat-grid">
+    {features.map((f) => (
+      <div class="feat">
+        {f.icon && <span class="feat-icon" aria-hidden="true">{f.icon}</span>}
+        <h3>{f.title}</h3>
+        <p class="muted">{f.body}</p>
+      </div>
+    ))}
+  </div>
+</section>
+<style>
+  .feat-grid {
+    display: grid; gap: 1.5rem;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  }
+  .feat { text-align: center; padding: 1rem; }
+  .feat-icon { font-size: 1.85rem; }
+  .feat h3 { margin: 0.4rem 0 0.25rem; font-size: 1.05rem; }
+</style>

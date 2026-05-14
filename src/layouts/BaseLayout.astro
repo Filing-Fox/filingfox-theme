@@ -1,0 +1,64 @@
+---
+import type { SiteConfig } from "../lib/site-config";
+import Header from "../components/Header.astro";
+import Footer from "../components/Footer.astro";
+import CartDrawer from "../components/CartDrawer.astro";
+import "../styles/base.css";
+
+interface Props {
+  site: SiteConfig;
+  title?: string;
+  description?: string;
+  ogImage?: string;
+  pathname?: string;
+}
+
+const { site, title, description, ogImage, pathname = "/" } = Astro.props;
+const pageTitle = title ? `${title} | ${site.siteName}` : `${site.siteName} — ${site.tagline}`;
+const desc = description ?? site.description;
+const url = `https://${site.domain}${pathname}`;
+const og = ogImage ?? "/og-default.png";
+---
+<!doctype html>
+<html lang="en" data-domain={site.domain}>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{pageTitle}</title>
+    <meta name="description" content={desc} />
+    <link rel="canonical" href={url} />
+    <link rel="icon" type="image/svg+xml" href={site.brand.favicon ?? "/favicon.svg"} />
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content={pageTitle} />
+    <meta property="og:description" content={desc} />
+    <meta property="og:url" content={url} />
+    <meta property="og:image" content={og} />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="theme-color" content={site.brand.primary} />
+    <style is:inline define:vars={{
+      brandPrimary: site.brand.primary,
+      brandPrimaryFg: site.brand.primaryFg,
+      brandAccent: site.brand.accent,
+    }}>
+      :root {
+        --color-primary: var(--brandPrimary);
+        --color-primary-fg: var(--brandPrimaryFg);
+        --color-accent: var(--brandAccent);
+      }
+    </style>
+  </head>
+  <body>
+    <a href="#main" class="skip-link">Skip to content</a>
+    <Header site={site} />
+    <main id="main">
+      <slot />
+    </main>
+    <Footer site={site} />
+    <CartDrawer site={site} />
+
+    <script type="module" define:vars={{ domain: site.domain, currency: site.currency }}>
+      import { registerCart } from "@filingfox/theme/cart";
+      registerCart({ domain, currency });
+    </script>
+  </body>
+</html>

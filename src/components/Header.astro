@@ -1,0 +1,55 @@
+---
+import type { SiteConfig } from "../lib/site-config";
+interface Props { site: SiteConfig; }
+const { site } = Astro.props;
+---
+<header class="site-header" x-data>
+  <div class="container header-inner">
+    <a href="/" class="brand" aria-label={site.siteName}>
+      <img src={site.brand.logo} alt={site.siteName} class="brand-logo" width="36" height="36" />
+      <span class="brand-name">{site.siteName}</span>
+    </a>
+    <nav class="nav" aria-label="Primary">
+      <a href="/">Home</a>
+      <a href="/products">Shop</a>
+      <a href="/about">About</a>
+      <a href="/contact">Contact</a>
+    </nav>
+    <button type="button" class="cart-btn btn btn-outline" @click="$store.cart.open = true" aria-label="Open cart">
+      <span aria-hidden="true">🛒</span>
+      <span x-text="`Cart (${$store.cart.count})`">Cart (0)</span>
+    </button>
+  </div>
+</header>
+
+<style>
+  .site-header {
+    border-bottom: 1px solid var(--color-border);
+    background: var(--color-bg);
+    position: sticky;
+    top: 0;
+    z-index: 30;
+  }
+  .header-inner {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.75rem 1.25rem;
+    gap: 1rem;
+  }
+  .brand {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.6rem;
+    text-decoration: none;
+    color: var(--color-fg);
+    font-weight: 700;
+    font-size: 1.05rem;
+  }
+  .brand-logo { border-radius: 6px; }
+  .nav { display: none; gap: 1.25rem; }
+  .nav a { text-decoration: none; color: var(--color-fg-muted); font-weight: 500; }
+  .nav a:hover { color: var(--color-fg); }
+  .cart-btn { padding: 0.5rem 0.9rem; }
+  @media (min-width: 760px) { .nav { display: flex; } }
+</style>

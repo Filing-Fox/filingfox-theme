@@ -1,0 +1,22 @@
+---
+import type { Product } from "../lib/select-products";
+import type { Currency } from "../lib/site-config";
+import ProductCard from "./ProductCard.astro";
+
+interface Props {
+  products: Product[];
+  currency: Currency;
+  heading?: string;
+  sub?: string;
+}
+const { products, currency, heading, sub } = Astro.props;
+---
+<section class="section">
+  <div class="container">
+    {heading && <h2>{heading}</h2>}
+    {sub && <p class="muted" style="margin-bottom:1.5rem">{sub}</p>}
+    <div class="grid-products">
+      {products.map((p) => <ProductCard product={p} currency={currency} />)}
+    </div>
+  </div>
+</section>

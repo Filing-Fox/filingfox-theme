@@ -1,0 +1,219 @@
+---
+import type { SiteConfig } from "../lib/site-config";
+interface Props { site: SiteConfig; }
+const { site } = Astro.props;
+---
+<section class="section">
+  <div class="container checkout-grid" x-data="checkoutForm()">
+    <form class="checkout-form card" @submit.prevent="submit()" novalidate>
+      <h1>Checkout</h1>
+      <p class="muted">Submit your order and {site.siteName} will contact you to confirm details.</p>
+
+      <fieldset>
+        <legend>Contact</legend>
+        <div class="row">
+          <div>
+            <label class="label" for="name">Full name *</label>
+            <input class="input" id="name" type="text" required autocomplete="name" x-model="form.name" />
+          </div>
+          <div>
+            <label class="label" for="email">Email *</label>
+            <input class="input" id="email" type="email" required autocomplete="email" x-model="form.email" />
+          </div>
+        </div>
+        <div class="row">
+          <div>
+            <label class="label" for="phone">Phone *</label>
+            <input class="input" id="phone" type="tel" required autocomplete="tel" x-model="form.phone" />
+          </div>
+        </div>
+      </fieldset>
+
+      <fieldset>
+        <legend>Shipping Address</legend>
+        <div>
+          <label class="label" for="address1">Address line 1 *</label>
+          <input class="input" id="address1" type="text" required autocomplete="address-line1" x-model="form.address1" />
+        </div>
+        <div>
+          <label class="label" for="address2">Address line 2</label>
+          <input class="input" id="address2" type="text" autocomplete="address-line2" x-model="form.address2" />
+        </div>
+        <div class="row">
+          <div>
+            <label class="label" for="city">City *</label>
+            <input class="input" id="city" type="text" required autocomplete="address-level2" x-model="form.city" />
+          </div>
+          <div>
+            <label class="label" for="region">State / Region *</label>
+            <input class="input" id="region" type="text" required autocomplete="address-level1" x-model="form.region" />
+          </div>
+        </div>
+        <div class="row">
+          <div>
+            <label class="label" for="postal">Postal code *</label>
+            <input class="input" id="postal" type="text" required autocomplete="postal-code" x-model="form.postalCode" />
+          </div>
+          <div>
+            <label class="label" for="country">Country *</label>
+            <input class="input" id="country" type="text" required autocomplete="country-name" x-model="form.country" />
+          </div>
+        </div>
+        <div>
+          <label class="label" for="notes">Order notes</label>
+          <textarea class="textarea" id="notes" rows="3" x-model="form.notes"></textarea>
+        </div>
+      </fieldset>
+
+      <div class="turnstile-wrap">
+        <div
+          class="cf-turnstile"
+          data-sitekey={site.orders.turnstileSiteKey}
+          data-callback="onTurnstile"
+          data-error-callback="onTurnstileError"
+          data-expired-callback="onTurnstileExpired"
+        ></div>
+      </div>
+
+      <p class="error" x-show="error" x-text="error" x-cloak></p>
+
+      <button type="submit" class="btn btn-primary submit-btn" :disabled="submitting || $store.cart.items.length === 0">
+        <span x-show="!submitting">Place Order</span>
+        <span x-show="submitting" x-cloak>Sending…</span>
+      </button>
+      <p class="muted small">Your order will be emailed to {site.siteName}. No payment is collected here.</p>
+    </form>
+
+    <aside class="order-summary card">
+      <h2>Order Summary</h2>
+      <template x-if="$store.cart.items.length === 0">
+        <p class="muted">Your cart is empty. <a href="/products">Browse products</a>.</p>
+      </template>
+      <template x-if="$store.cart.items.length > 0">
+        <div>
+          <ul class="lines">
+            <template x-for="item in $store.cart.items" :key="item.slug">
+              <li class="summary-line">
+                <img :src="item.image" :alt="item.name" width="48" height="48" />
+                <div class="summary-info">
+                  <span class="summary-name" x-text="item.name"></span>
+                  <span class="muted small" x-text="`Qty ${item.qty}`"></span>
+                </div>
+                <span class="summary-price" x-text="$store.cart.format(item.price * item.qty)"></span>
+              </li>
+            </template>
+          </ul>
+          <div class="totals">
+            <div class="totals-row"><span>Subtotal</span><span x-text="$store.cart.format($store.cart.subtotal)"></span></div>
+            <div class="totals-row total"><span>Total</span><span x-text="$store.cart.format($store.cart.subtotal)"></span></div>
+          </div>
+        </div>
+      </template>
+    </aside>
+  </div>
+</section>
+
+<script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
+
+<script define:vars={{
+  domain: site.domain,
+  currency: site.currency,
+  workerUrl: site.orders.workerUrl,
+  siteEmail: site.email,
+}}>
+  function checkoutForm() {
+    return {
+      form: {
+        name: "", email: "", phone: "",
+        address1: "", address2: "",
+        city: "", region: "", postalCode: "", country: "",
+        notes: "",
+      },
+      turnstileToken: "",
+      submitting: false,
+      error: "",
+      init() {
+        window.onTurnstile = (token) => { this.turnstileToken = token; };
+        window.onTurnstileError = () => { this.error = "Captcha failed. Please refresh."; };
+        window.onTurnstileExpired = () => { this.turnstileToken = ""; };
+      },
+      async submit() {
+        this.error = "";
+        const cart = this.$store.cart;
+        if (cart.items.length === 0) { this.error = "Your cart is empty."; return; }
+        if (!this.turnstileToken) { this.error = "Please complete the captcha."; return; }
+        const required = ["name","email","phone","address1","city","region","postalCode","country"];
+        for (const k of required) {
+          if (!this.form[k] || String(this.form[k]).trim() === "") {
+            this.error = "Please fill all required fields.";
+            return;
+          }
+        }
+        const payload = {
+          domain,
+          currency,
+          items: cart.items.map((i) => ({
+            slug: i.slug, name: i.name, sku: i.sku, price: i.price, qty: i.qty, image: i.image,
+          })),
+          subtotal: Math.round(cart.subtotal * 100) / 100,
+          customer: { ...this.form },
+          turnstileToken: this.turnstileToken,
+        };
+        this.submitting = true;
+        try {
+          const res = await fetch(`${workerUrl.replace(/\/$/, "")}/order`, {
+            method: "POST",
+            headers: { "content-type": "application/json" },
+            body: JSON.stringify(payload),
+            mode: "cors",
+            credentials: "omit",
+          });
+          const data = await res.json().catch(() => ({}));
+          if (!res.ok || !data.ok) {
+            this.error = data.error || `Failed (${res.status}). Try again or email ${siteEmail}.`;
+            this.submitting = false;
+            return;
+          }
+          cart.clear();
+          location.href = `/thank-you?ref=${encodeURIComponent(data.ref || "")}`;
+        } catch (err) {
+          this.error = `Network error. Try again or email ${siteEmail}.`;
+          this.submitting = false;
+        }
+      },
+    };
+  }
+  window.checkoutForm = checkoutForm;
+</script>
+<style>
+  [x-cloak] { display: none !important; }
+  .checkout-grid {
+    display: grid; gap: 2rem;
+    grid-template-columns: 1fr;
+  }
+  @media (min-width: 900px) { .checkout-grid { grid-template-columns: 1.4fr 1fr; align-items: start; } }
+  .checkout-form { padding: 1.75rem; display: grid; gap: 1.25rem; }
+  .checkout-form fieldset { border: 0; padding: 0; margin: 0; display: grid; gap: 0.85rem; }
+  .checkout-form legend { font-weight: 600; font-size: 1.05rem; margin-bottom: 0.35rem; padding: 0; }
+  .row { display: grid; gap: 0.85rem; grid-template-columns: 1fr 1fr; }
+  @media (max-width: 580px) { .row { grid-template-columns: 1fr; } }
+  .error { color: var(--color-danger); font-weight: 500; }
+  .submit-btn { width: 100%; padding: 0.95rem; font-size: 1.05rem; }
+  .order-summary { padding: 1.5rem; position: sticky; top: 5rem; }
+  .lines { list-style: none; margin: 0; padding: 0; }
+  .summary-line {
+    display: grid; grid-template-columns: 48px 1fr auto; gap: 0.75rem;
+    align-items: center; padding: 0.6rem 0; border-bottom: 1px solid var(--color-border);
+  }
+  .summary-line img { border-radius: var(--radius); }
+  .summary-info { display: flex; flex-direction: column; min-width: 0; }
+  .summary-name {
+    font-size: 0.9rem; font-weight: 500;
+    display: -webkit-box; -webkit-line-clamp: 1; -webkit-box-orient: vertical; overflow: hidden;
+  }
+  .summary-price { font-weight: 600; font-size: 0.95rem; }
+  .totals { margin-top: 1rem; padding-top: 0.75rem; border-top: 1px solid var(--color-border); display: grid; gap: 0.4rem; }
+  .totals-row { display: flex; justify-content: space-between; }
+  .totals-row.total { font-weight: 700; font-size: 1.15rem; padding-top: 0.4rem; border-top: 1px solid var(--color-border); }
+  .turnstile-wrap { display: flex; justify-content: center; }
+</style>

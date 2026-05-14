@@ -1,0 +1,103 @@
+---
+import type { SiteConfig } from "../lib/site-config";
+interface Props { site: SiteConfig; }
+const { site } = Astro.props;
+---
+<aside
+  class="cart-drawer"
+  x-data
+  x-cloak
+  x-show="$store.cart.open"
+  x-transition.opacity
+  @keydown.escape.window="$store.cart.open = false"
+  aria-label="Shopping cart"
+>
+  <div class="cart-backdrop" @click="$store.cart.open = false"></div>
+  <div class="cart-panel" role="dialog" aria-modal="true" aria-labelledby="cart-title">
+    <header class="cart-head">
+      <h2 id="cart-title">Your Cart</h2>
+      <button type="button" class="cart-close" @click="$store.cart.open = false" aria-label="Close cart">×</button>
+    </header>
+    <template x-if="$store.cart.items.length === 0">
+      <p class="cart-empty muted">Your cart is empty.</p>
+    </template>
+    <template x-if="$store.cart.items.length > 0">
+      <div class="cart-body">
+        <ul class="cart-lines">
+          <template x-for="item in $store.cart.items" :key="item.slug">
+            <li class="cart-line">
+              <img :src="item.image" :alt="item.name" width="64" height="64" />
+              <div class="line-info">
+                <a class="line-name" :href="`/products/${item.slug}`" x-text="item.name"></a>
+                <span class="muted small" x-text="`SKU ${item.sku}`"></span>
+                <div class="line-qty">
+                  <button type="button" @click="$store.cart.setQty(item.slug, item.qty - 1)" aria-label="Decrease quantity">−</button>
+                  <span x-text="item.qty"></span>
+                  <button type="button" @click="$store.cart.setQty(item.slug, item.qty + 1)" aria-label="Increase quantity">+</button>
+                </div>
+              </div>
+              <div class="line-end">
+                <span class="line-price" x-text="$store.cart.format(item.price * item.qty)"></span>
+                <button type="button" class="line-remove" @click="$store.cart.remove(item.slug)" aria-label="Remove">Remove</button>
+              </div>
+            </li>
+          </template>
+        </ul>
+        <footer class="cart-foot">
+          <div class="subtotal-row">
+            <span>Subtotal</span>
+            <span x-text="$store.cart.format($store.cart.subtotal)" class="subtotal"></span>
+          </div>
+          <a href="/checkout" class="btn btn-primary cart-checkout">Checkout</a>
+          <button type="button" class="btn btn-outline" @click="$store.cart.open = false">Continue Shopping</button>
+        </footer>
+      </div>
+    </template>
+  </div>
+</aside>
+<style>
+  [x-cloak] { display: none !important; }
+  .cart-drawer { position: fixed; inset: 0; z-index: 100; }
+  .cart-backdrop { position: absolute; inset: 0; background: rgba(0, 0, 0, 0.45); }
+  .cart-panel {
+    position: absolute; top: 0; right: 0; bottom: 0;
+    width: min(420px, 100vw);
+    background: white;
+    display: flex; flex-direction: column;
+    box-shadow: -12px 0 24px rgba(0, 0, 0, 0.15);
+  }
+  .cart-head {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 1rem 1.25rem; border-bottom: 1px solid var(--color-border);
+  }
+  .cart-head h2 { margin: 0; font-size: 1.15rem; }
+  .cart-close { background: none; border: 0; font-size: 1.75rem; line-height: 1; }
+  .cart-empty { padding: 2rem 1.25rem; }
+  .cart-body { display: flex; flex-direction: column; flex: 1; overflow: hidden; }
+  .cart-lines { list-style: none; margin: 0; padding: 0; overflow-y: auto; flex: 1; }
+  .cart-line {
+    display: grid;
+    grid-template-columns: 64px 1fr auto;
+    gap: 0.85rem;
+    padding: 1rem 1.25rem;
+    border-bottom: 1px solid var(--color-border);
+  }
+  .cart-line img { border-radius: var(--radius); object-fit: cover; aspect-ratio: 1; }
+  .line-info { display: flex; flex-direction: column; gap: 0.25rem; min-width: 0; }
+  .line-name { font-weight: 600; color: var(--color-fg); text-decoration: none; }
+  .small { font-size: 0.8rem; }
+  .line-qty {
+    display: inline-flex; align-items: center; gap: 0.5rem;
+    margin-top: 0.35rem;
+  }
+  .line-qty button {
+    background: var(--color-bg-alt); border: 1px solid var(--color-border);
+    width: 26px; height: 26px; border-radius: 6px;
+  }
+  .line-end { display: flex; flex-direction: column; align-items: flex-end; justify-content: space-between; }
+  .line-price { font-weight: 600; }
+  .line-remove { background: none; border: 0; color: var(--color-danger); font-size: 0.8rem; padding: 0; }
+  .cart-foot { padding: 1.25rem; border-top: 1px solid var(--color-border); display: grid; gap: 0.75rem; }
+  .subtotal-row { display: flex; justify-content: space-between; font-weight: 600; font-size: 1.1rem; }
+  .cart-checkout { width: 100%; }
+</style>
