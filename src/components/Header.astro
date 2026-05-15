@@ -2,12 +2,8 @@
 import type { SiteConfig } from "../lib/site-config";
 interface Props { site: SiteConfig; }
 const { site } = Astro.props;
-// Logo display: if a wide PNG/SVG is provided, render at full aspect (no name text).
-// Detect by extension or explicit `wide` flag in brand config.
-const logoIsWide = /\.(png|jpe?g|webp|svg)$/i.test(site.brand.logo) &&
-  !/logo\.svg$|favicon/i.test(site.brand.logo) === false ? true : true; // default: render as image only, hide brand-name
 ---
-<header class="site-header" x-data>
+<header class="site-header">
   <div class="container header-inner">
     <a href="/" class="brand" aria-label={site.siteName}>
       <img src={site.brand.logo} alt={site.siteName} class="brand-logo" height="48" />
@@ -18,13 +14,12 @@ const logoIsWide = /\.(png|jpe?g|webp|svg)$/i.test(site.brand.logo) &&
       <a href="/about">About</a>
       <a href="/contact">Contact</a>
     </nav>
-    <button type="button" class="cart-btn" @click="$store.cart.open = true" aria-label="Open cart">
+    <button type="button" class="cart-btn" data-cart-open aria-label="Open cart">
       <span aria-hidden="true">🛒</span>
-      <span x-text="`Cart (${$store.cart.count})`">Cart (0)</span>
+      <span>Cart (<span data-cart-count>0</span>)</span>
     </button>
   </div>
 </header>
-
 <style>
   .site-header {
     background: var(--color-primary);
@@ -55,10 +50,7 @@ const logoIsWide = /\.(png|jpe?g|webp|svg)$/i.test(site.brand.logo) &&
     object-fit: contain;
     display: block;
   }
-  .nav {
-    display: none;
-    gap: 1.5rem;
-  }
+  .nav { display: none; gap: 1.5rem; }
   .nav a {
     text-decoration: none;
     color: var(--color-primary-fg);

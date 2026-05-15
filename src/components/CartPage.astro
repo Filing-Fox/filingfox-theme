@@ -4,50 +4,49 @@ interface Props { site: SiteConfig; }
 const { site } = Astro.props;
 ---
 <section class="section">
-  <div class="container" x-data>
+  <div class="container">
     <h1>Your Cart</h1>
-    <template x-if="$store.cart.items.length === 0">
+    <div data-cart-empty>
       <div class="empty">
         <p class="muted">Your cart is empty.</p>
         <a class="btn btn-primary" href="/products">Continue Shopping</a>
       </div>
-    </template>
-    <template x-if="$store.cart.items.length > 0">
-      <div class="cart-page">
-        <ul class="lines">
-          <template x-for="item in $store.cart.items" :key="item.slug">
-            <li class="line">
-              <img :src="item.image" :alt="item.name" width="100" height="100" />
-              <div class="info">
-                <a class="name" :href="`/products/${item.slug}`" x-text="item.name"></a>
-                <span class="muted small" x-text="`SKU ${item.sku}`"></span>
-                <span class="muted small" x-text="$store.cart.format(item.price) + ' each'"></span>
-              </div>
-              <div class="qty">
-                <button type="button" @click="$store.cart.setQty(item.slug, item.qty - 1)" aria-label="Decrease">−</button>
-                <input type="number" min="0" max="99" :value="item.qty" @change="$store.cart.setQty(item.slug, parseInt($event.target.value, 10))" />
-                <button type="button" @click="$store.cart.setQty(item.slug, item.qty + 1)" aria-label="Increase">+</button>
-              </div>
-              <div class="end">
-                <span class="line-total" x-text="$store.cart.format(item.price * item.qty)"></span>
-                <button type="button" class="remove" @click="$store.cart.remove(item.slug)">Remove</button>
-              </div>
-            </li>
-          </template>
-        </ul>
-        <aside class="cart-side card">
-          <h2>Summary</h2>
-          <div class="totals">
-            <div class="row"><span>Subtotal</span><span x-text="$store.cart.format($store.cart.subtotal)"></span></div>
-            <div class="row total"><span>Total</span><span x-text="$store.cart.format($store.cart.subtotal)"></span></div>
-          </div>
-          <a class="btn btn-primary checkout" href="/checkout">Proceed to Checkout</a>
-          <a class="btn btn-outline" href="/products">Continue Shopping</a>
-        </aside>
-      </div>
-    </template>
+    </div>
+    <div class="cart-page" data-cart-body style="display:none">
+      <ul class="lines" data-cart-lines data-cart-line-template="#tpl-cartpage-line"></ul>
+      <aside class="cart-side card">
+        <h2>Summary</h2>
+        <div class="totals">
+          <div class="row"><span>Subtotal</span><span data-cart-subtotal>—</span></div>
+          <div class="row total"><span>Total</span><span data-cart-subtotal>—</span></div>
+        </div>
+        <a class="btn btn-primary checkout" href="/checkout">Proceed to Checkout</a>
+        <a class="btn btn-outline" href="/products">Continue Shopping</a>
+        <button type="button" class="btn btn-outline clear" data-cart-clear>Clear cart</button>
+      </aside>
+    </div>
   </div>
 </section>
+
+<template id="tpl-cartpage-line">
+  <li class="line">
+    <img data-cart-slot="image" width="100" height="100" alt="" />
+    <div class="info">
+      <a class="name" data-cart-slot="name"></a>
+      <span class="muted small" data-cart-slot="sku"></span>
+    </div>
+    <div class="qty">
+      <button type="button" data-cart-slot="dec" aria-label="Decrease">−</button>
+      <span data-cart-slot="qty"></span>
+      <button type="button" data-cart-slot="inc" aria-label="Increase">+</button>
+    </div>
+    <div class="end">
+      <span class="line-total" data-cart-slot="price"></span>
+      <button type="button" class="remove" data-cart-slot="remove">Remove</button>
+    </div>
+  </li>
+</template>
+
 <style>
   .empty { text-align: center; padding: 4rem 0; display: grid; gap: 1.25rem; justify-items: center; }
   .cart-page { display: grid; gap: 2rem; grid-template-columns: 1fr; }
@@ -67,8 +66,7 @@ const { site } = Astro.props;
   .name { font-weight: 600; color: var(--color-fg); text-decoration: none; }
   .small { font-size: 0.85rem; }
   .qty { display: inline-flex; align-items: center; gap: 0.4rem; }
-  .qty input { width: 50px; text-align: center; padding: 0.4rem; border: 1px solid var(--color-border); border-radius: var(--radius); }
-  .qty button { width: 30px; height: 30px; border-radius: 6px; background: var(--color-bg-alt); border: 1px solid var(--color-border); }
+  .qty button { width: 30px; height: 30px; border-radius: 6px; background: var(--color-bg-alt); border: 1px solid var(--color-border); cursor: pointer; }
   .end { display: flex; flex-direction: column; align-items: flex-end; gap: 0.25rem; }
   .line-total { font-weight: 600; }
   .remove { background: none; border: 0; color: var(--color-danger); font-size: 0.85rem; cursor: pointer; }
@@ -77,4 +75,5 @@ const { site } = Astro.props;
   .row { display: flex; justify-content: space-between; }
   .total { font-weight: 700; font-size: 1.15rem; }
   .checkout { width: 100%; }
+  .clear { color: var(--color-danger); border-color: var(--color-danger); }
 </style>

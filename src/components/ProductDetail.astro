@@ -19,7 +19,7 @@ const productJson = JSON.stringify({
 });
 ---
 <section class="section">
-  <div class="container product-detail" x-data="{ qty: 1 }">
+  <div class="container product-detail">
     <div class="gallery">
       <img class="main" src={product.images[0]} alt={product.name} width="900" height="900" />
       {product.images.length > 1 && (
@@ -41,12 +41,12 @@ const productJson = JSON.stringify({
       <p class="short-desc">{product.shortDesc}</p>
       <div class="qty-row">
         <label class="label" for="qty">Quantity</label>
-        <input class="input qty-input" id="qty" type="number" min="1" max="99" x-model.number="qty" />
+        <input class="input qty-input" id="qty" type="number" min="1" max="99" value="1" />
         <button
           type="button"
-          class="btn btn-primary"
+          class="btn btn-primary add-btn"
+          data-cart-add
           data-product={productJson}
-          @click={`$store.cart.add(JSON.parse($el.dataset.product), qty)`}
         >
           Add to Cart
         </button>
@@ -68,15 +68,29 @@ const productJson = JSON.stringify({
     </div>
   </div>
 </section>
+<script>
+  // Sync the qty input value into the Add to Cart button so cart.js reads it.
+  document.addEventListener("input", (ev) => {
+    const t = ev.target;
+    if (!(t instanceof HTMLInputElement) || t.id !== "qty") return;
+    const btn = document.querySelector('[data-cart-add][data-product]');
+    if (btn) btn.setAttribute("data-qty", String(parseInt(t.value, 10) || 1));
+  });
+  // Initialize qty attr from default input value on load
+  document.addEventListener("DOMContentLoaded", () => {
+    const i = document.getElementById("qty");
+    const btn = document.querySelector('[data-cart-add][data-product]');
+    if (i instanceof HTMLInputElement && btn) {
+      btn.setAttribute("data-qty", String(parseInt(i.value, 10) || 1));
+    }
+  });
+</script>
 <style>
-  .product-detail {
-    display: grid; gap: 2.5rem;
-    grid-template-columns: 1fr;
-  }
+  .product-detail { display: grid; gap: 2.5rem; grid-template-columns: 1fr; }
   @media (min-width: 800px) { .product-detail { grid-template-columns: 1fr 1fr; } }
-  .gallery .main { width: 100%; aspect-ratio: 1; object-fit: cover; border-radius: var(--radius-lg); }
+  .gallery .main { width: 100%; aspect-ratio: 1; object-fit: contain; padding: 5%; background: linear-gradient(135deg, #f3f4f6 0%, #fafafa 100%); border-radius: var(--radius-lg); }
   .thumbs { display: grid; grid-template-columns: repeat(4, 1fr); gap: 0.5rem; margin-top: 0.75rem; }
-  .thumbs img { aspect-ratio: 1; object-fit: cover; border-radius: var(--radius); }
+  .thumbs img { aspect-ratio: 1; object-fit: contain; padding: 8%; background: var(--color-bg-alt); border-radius: var(--radius); }
   .price-big { font-size: 2rem; font-weight: 700; }
   .price-row { display: flex; gap: 0.75rem; align-items: baseline; margin: 0.75rem 0 1rem; }
   .short-desc { color: var(--color-fg-muted); margin-bottom: 1.25rem; }
