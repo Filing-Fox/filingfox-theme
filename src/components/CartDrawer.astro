@@ -11,6 +11,7 @@ const { site } = Astro.props;
   x-transition.opacity
   @keydown.escape.window="$store.cart.open = false"
   aria-label="Shopping cart"
+  style="display:none"
 >
   <div class="cart-backdrop" @click="$store.cart.open = false"></div>
   <div class="cart-panel" role="dialog" aria-modal="true" aria-labelledby="cart-title">

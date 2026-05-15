@@ -66,11 +66,16 @@ const og = ogImage ?? "/og-default.png";
       // Reads runtime config from <html> data-* attributes (set above).
       import { registerCart } from "@filingfox/theme/cart";
       const root = document.documentElement;
+      console.log("[ff-cart] init", {
+        domain: root.dataset.domain,
+        currency: root.dataset.currency,
+      });
       registerCart({
         domain: root.dataset.domain || "site",
         currency: root.dataset.currency || "USD",
         currencyLocale: root.dataset.currencyLocale || "en-US",
       });
+      console.log("[ff-cart] alpine ready, store:", window.Alpine?.store("cart"));
     </script>
   </body>
 </html>
