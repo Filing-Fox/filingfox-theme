@@ -27,8 +27,8 @@ export interface SiteConfig {
   hours?: string;
   social?: SiteSocial;
 
-  niche: Niche;
-  productCount: number;
+  niches: Niche[];
+  itemsPerNiche: number;
   featuredSlugs?: string[];
   priceMultiplier?: number;
   currency: Currency;
