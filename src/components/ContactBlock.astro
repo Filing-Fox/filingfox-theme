@@ -7,10 +7,9 @@ const { site } = Astro.props;
   <div class="container contact-grid">
     <div>
       <h2>Get in touch</h2>
-      <p class="muted">Questions about an order or product? We'd love to hear from you.</p>
+      <p class="muted">Questions about an order or product? We'd love to hear from you. Email us — we respond within one business day.</p>
       <ul class="contact-list">
         <li><strong>Email:</strong> <a href={`mailto:${site.email}`}>{site.email}</a></li>
-        <li><strong>Phone:</strong> <a href={`tel:${site.phone.replace(/[^+\d]/g, "")}`}>{site.phone}</a></li>
         <li>
           <strong>Address:</strong>
           <address>
@@ -35,7 +34,8 @@ const { site } = Astro.props;
     grid-template-columns: 1fr;
   }
   @media (min-width: 800px) { .contact-grid { grid-template-columns: 1.3fr 1fr; align-items: start; } }
-  .contact-list { list-style: none; padding: 0; margin: 1.25rem 0; display: grid; gap: 0.85rem; }
+  .contact-list { list-style: none; padding: 0; margin: 1.25rem 0; display: grid; gap: 0.85rem; word-break: break-word; }
+  .contact-list a { word-break: break-all; }
   address { font-style: normal; }
   .contact-card { padding: 1.75rem; display: grid; gap: 0.85rem; }
 </style>

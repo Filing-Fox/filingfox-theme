@@ -25,9 +25,10 @@ const productJson = JSON.stringify({
   price: product.price,
   image: product.images[0],
 });
+const detailHref = `/products/${product.slug}`;
 ---
-<article class="product-card" x-data="{ hover: false }" @mouseenter="hover = true" @mouseleave="hover = false">
-  <a class="product-image" href={`/products/${product.slug}`} aria-label={product.name}>
+<article class="product-card">
+  <a class="product-image" href={detailHref} aria-label={product.name}>
     <img
       src={product.images[0]}
       alt={product.name}
@@ -49,25 +50,14 @@ const productJson = JSON.stringify({
         aria-hidden="true"
       />
     )}
-    {onSale && discountPct > 0 && (
-      <span class="badge-sale">-{discountPct}%</span>
-    )}
+    {onSale && discountPct > 0 && <span class="badge-sale">-{discountPct}%</span>}
     {product.stock !== undefined && product.stock < 10 && product.stock > 0 && (
       <span class="badge-low">Only {product.stock} left</span>
     )}
-    <button
-      type="button"
-      class="quick-add"
-      data-product={productJson}
-      @click.prevent.stop={`$store.cart.add(JSON.parse($el.dataset.product), 1)`}
-      aria-label={`Add ${product.name} to cart`}
-    >
-      <span aria-hidden="true">+</span> Add to cart
-    </button>
   </a>
   <div class="product-body">
     <span class="brand-tag" set:text={product.brand ?? product.category}></span>
-    <a class="product-name" href={`/products/${product.slug}`}>{product.name}</a>
+    <a class="product-name" href={detailHref}>{product.name}</a>
     <div class="rating-row" aria-label={`${rating.toFixed(1)} out of 5 stars`}>
       <span class="stars" aria-hidden="true">
         {Array.from({ length: fullStars }).map(() => <span class="star full">★</span>)}
@@ -82,6 +72,16 @@ const productJson = JSON.stringify({
         <span class="price-was">{fmt.format(product.compareAtPrice)}</span>
       )}
     </div>
+    <button
+      type="button"
+      class="add-btn"
+      data-product={productJson}
+      x-data
+      @click={`$store.cart.add(JSON.parse($el.dataset.product), 1)`}
+      aria-label={`Add ${product.name} to cart`}
+    >
+      <span aria-hidden="true">+</span> Add to cart
+    </button>
   </div>
 </article>
 <style>
@@ -116,7 +116,7 @@ const productJson = JSON.stringify({
   }
   .img-secondary {
     position: absolute;
-    top: 0; left: 0;
+    inset: 0;
     opacity: 0;
   }
   .product-card:hover .img-primary { opacity: 0; transform: scale(1.02); }
@@ -144,33 +144,7 @@ const productJson = JSON.stringify({
     padding: 0.2rem 0.5rem;
     border-radius: 4px;
   }
-  .quick-add {
-    position: absolute;
-    left: 0.6rem;
-    right: 0.6rem;
-    bottom: 0.6rem;
-    padding: 0.55rem 0.75rem;
-    background: var(--color-primary);
-    color: var(--color-primary-fg);
-    border: 0;
-    border-radius: var(--radius);
-    font-weight: 600;
-    font-size: 0.88rem;
-    cursor: pointer;
-    opacity: 0;
-    transform: translateY(8px);
-    transition: opacity 0.2s, transform 0.2s, filter 0.15s;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    gap: 0.35rem;
-  }
-  .quick-add:hover { filter: brightness(1.1); }
-  .product-card:hover .quick-add { opacity: 1; transform: translateY(0); }
-  @media (max-width: 760px) {
-    .quick-add { opacity: 1; transform: none; }
-  }
-  .product-body { padding: 0.85rem 0.95rem 1.1rem; display: flex; flex-direction: column; gap: 0.4rem; }
+  .product-body { padding: 0.9rem 0.95rem 1rem; display: flex; flex-direction: column; gap: 0.4rem; }
   .brand-tag {
     font-size: 0.7rem;
     text-transform: uppercase;
@@ -207,7 +181,25 @@ const productJson = JSON.stringify({
     color: transparent;
   }
   .review-count { color: var(--color-fg-muted); font-size: 0.8rem; }
-  .price-row { display: flex; gap: 0.5rem; align-items: baseline; margin-top: 0.15rem; }
+  .price-row { display: flex; gap: 0.5rem; align-items: baseline; }
   .price-now { font-weight: 700; font-size: 1.1rem; color: var(--color-fg); }
   .price-was { font-size: 0.85rem; color: var(--color-fg-muted); text-decoration: line-through; }
+  .add-btn {
+    margin-top: 0.5rem;
+    background: var(--color-primary);
+    color: var(--color-primary-fg);
+    border: 0;
+    border-radius: var(--radius);
+    padding: 0.7rem 0.95rem;
+    font-weight: 600;
+    font-size: 0.92rem;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.4rem;
+    transition: filter 0.15s, transform 0.05s;
+  }
+  .add-btn:hover { filter: brightness(1.15); }
+  .add-btn:active { transform: translateY(1px); }
 </style>

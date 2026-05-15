@@ -21,9 +21,8 @@ const year = new Date().getFullYear();
       <h4>Shop</h4>
       <ul>
         <li><a href="/products">All Products</a></li>
-        <li><a href="/products#cat-mens-shirts">Men</a></li>
-        <li><a href="/products#cat-womens-dresses">Women</a></li>
         <li><a href="/products">New Arrivals</a></li>
+        <li><a href="/cart">Cart</a></li>
       </ul>
     </div>
     <div>
@@ -41,22 +40,8 @@ const year = new Date().getFullYear();
         <li><a href="/about">About {site.siteName}</a></li>
         <li><a href="/privacy">Privacy Policy</a></li>
         <li><a href="/terms">Terms of Service</a></li>
-        <li><a href={`tel:${site.phone.replace(/[^+\d]/g, "")}`}>{site.phone}</a></li>
+        <li><a href={`mailto:${site.email}`}>{site.email}</a></li>
       </ul>
-    </div>
-  </div>
-  <div class="payment-row">
-    <div class="container payment-flex">
-      <span class="muted small">We accept:</span>
-      <div class="payment-icons" aria-label="Accepted payment methods">
-        <span class="pay-pill">VISA</span>
-        <span class="pay-pill">MasterCard</span>
-        <span class="pay-pill">AMEX</span>
-        <span class="pay-pill">Discover</span>
-        <span class="pay-pill">PayPal</span>
-        <span class="pay-pill">Apple Pay</span>
-        <span class="pay-pill">Google Pay</span>
-      </div>
     </div>
   </div>
   <div class="container footer-bottom">
@@ -101,35 +86,18 @@ const year = new Date().getFullYear();
   }
   .site-footer ul { list-style: none; padding: 0; margin: 0; }
   .site-footer ul li { margin-bottom: 0.55rem; }
-  .site-footer a { color: var(--color-fg-muted); text-decoration: none; transition: color 0.15s; }
+  .site-footer a {
+    color: var(--color-fg-muted);
+    text-decoration: none;
+    transition: color 0.15s;
+    word-break: break-word;
+  }
   .site-footer a:hover { color: var(--color-fg); }
   address { font-style: normal; }
   .small { font-size: 0.85rem; line-height: 1.55; }
-  .payment-row {
-    background: white;
-    border-top: 1px solid var(--color-border);
-    padding: 1.25rem 0;
-  }
-  .payment-flex {
-    display: flex;
-    align-items: center;
-    gap: 0.85rem;
-    flex-wrap: wrap;
-    justify-content: space-between;
-  }
-  .payment-icons { display: flex; gap: 0.4rem; flex-wrap: wrap; }
-  .pay-pill {
-    background: var(--color-bg-alt);
-    border: 1px solid var(--color-border);
-    padding: 0.3rem 0.7rem;
-    border-radius: 4px;
-    font-size: 0.75rem;
-    font-weight: 600;
-    color: var(--color-fg);
-  }
   .footer-bottom {
     border-top: 1px solid var(--color-border);
-    padding: 1rem 0 1.25rem;
+    padding: 1.25rem 0 1.5rem;
     display: flex;
     justify-content: space-between;
     align-items: center;

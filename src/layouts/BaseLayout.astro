@@ -20,7 +20,12 @@ const url = `https://${site.domain}${pathname}`;
 const og = ogImage ?? "/og-default.png";
 ---
 <!doctype html>
-<html lang="en" data-domain={site.domain}>
+<html
+  lang="en"
+  data-domain={site.domain}
+  data-currency={site.currency}
+  data-currency-locale="en-US"
+>
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -56,9 +61,16 @@ const og = ogImage ?? "/og-default.png";
     <Footer site={site} />
     <CartDrawer site={site} />
 
-    <script type="module" define:vars={{ domain: site.domain, currency: site.currency }}>
+    <script>
+      // Bundled by Astro/Vite — resolves @filingfox/theme via node_modules.
+      // Reads runtime config from <html> data-* attributes (set above).
       import { registerCart } from "@filingfox/theme/cart";
-      registerCart({ domain, currency });
+      const root = document.documentElement;
+      registerCart({
+        domain: root.dataset.domain || "site",
+        currency: root.dataset.currency || "USD",
+        currencyLocale: root.dataset.currencyLocale || "en-US",
+      });
     </script>
   </body>
 </html>
